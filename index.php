@@ -24,7 +24,6 @@ include 'controllers/medicine_controller.php';
             <tbody>
                 <?php
                     foreach ($med_result as $row) {
-
                 ?>
                 <tr>
                     <td><?=$row['med_name'] ?></td>
