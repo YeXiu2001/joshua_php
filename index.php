@@ -80,6 +80,7 @@ function deletemed(el){
                 data: {
                     medID: medID
                 },
+
                 success: function(response){
                     swal.fire({
                         title: 'Medicine deleted',
@@ -97,6 +98,7 @@ function deletemed(el){
                         icon: 'error'
                     });
                 }
+                
             });
         }
     })
