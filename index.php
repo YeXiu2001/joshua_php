@@ -5,11 +5,14 @@ include 'controllers/medicine_controller.php';
 ?>
 
 <div class="container">
+
     <h3 class="text-center">Simple Pharmacy System</h3>
     <div class="mt-3">
         <button class="btn btn-primary">Buy</button>
         <button class="btn btn-primary">Add Medicine</button>
+        <button class="btn btn-secondary">View ERD</button>
     </div>
+    
     <div class="mt-3">
     <table id="med_tbl" class="table table-striped table-bordered">
             <thead>
@@ -32,7 +35,7 @@ include 'controllers/medicine_controller.php';
                     <td>&#8369;<?= number_format($row['price'], 2) ?></td>
                     <td>
                         <a href="#" style="margin-right: 10px;"><i class="fas fa-edit" style="color:red;"></i></a>
-                        <a href="#"><i class="fas fa-trash" style="color:red;"></i></a>
+                        <a data-deleteID="<?=$row['medID'] ?>" onclick="deletemed(this)"> <i class="fas fa-trash" style="color:red;"></i> </a>
                     </td>
                 </tr>
                 <?php
@@ -41,6 +44,7 @@ include 'controllers/medicine_controller.php';
             </tbody>
         </table>
     </div>
+
 </div>
 
 <script>
@@ -55,7 +59,50 @@ include 'controllers/medicine_controller.php';
         }
     });
 });
+
+function deletemed(el){
+    let medID = $(el).attr('data-deleteID');
+
+    swal.fire({
+        title: 'Delete Medicine?',
+        text: 'This cannot be undone',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Delete',
+        cancelButtonText: 'Cancel',
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: 'controllers/delete_medicine.php',
+                method: 'POST',
+                data: {
+                    medID: medID
+                },
+                success: function(response){
+                    swal.fire({
+                        title: 'Medicine deleted',
+                        text: 'The medicine has been successfully deleted',
+                        icon: 'success'
+                    }).then(() => {
+                        location.reload();
+                    });
+                },
+                error: function(err){
+                    console.log(err.message);
+                    swal.fire({
+                        title: 'Error',
+                        text: 'There was an error deleting the medicine',
+                        icon: 'error'
+                    });
+                }
+            });
+        }
+    })
+}
 </script>
+
 <?php
 $content = ob_get_clean();
 include 'includes/app.php';
