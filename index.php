@@ -11,7 +11,7 @@ include 'controllers/customer_controller.php';
     <h3 class="text-center">Simple Pharmacy System</h3>
     <div class="mt-3">
         <button class="btn btn-primary"onclick="show_buymedmodal()">Buy</button>
-        <button class="btn btn-primary" onclick="show_buymedmodal()">Add Medicine</button>
+        <button class="btn btn-primary" onclick="show_addmedmodal()">Add Medicine</button>
         <button class="btn btn-secondary">View ERD</button>
     </div>
     
@@ -36,7 +36,9 @@ include 'controllers/customer_controller.php';
                     <td><?=$row['stock_num']?> pcs</td>
                     <td>&#8369;<?= number_format($row['price'], 2) ?></td>
                     <td>
+                        <!-- icon for edit -->
                         <a data-editID="<?=$row['medID'] ?>" style="margin-right: 10px;" onclick="editmed(this)"><i class="fas fa-edit" style="color:red;"></i></a>
+                         <!-- icon for edit -->
                         <a data-deleteID="<?=$row['medID'] ?>" onclick="deletemed(this)"> <i class="fas fa-trash" style="color:red;"></i> </a>
                     </td>
                 </tr>
@@ -154,7 +156,7 @@ include 'controllers/customer_controller.php';
                                <?php
                                     foreach ($customers as $row) {
                                ?>
-                               <option value="<?=$row['id']?>"><?=$row['customer_name']?></option>
+                               <option data-discount="<?=$row['discount']?>" value="<?=$row['id']?>"><?=$row['customer_name']?></option>
                                <?php
                                     }
                                 ?>
@@ -168,19 +170,34 @@ include 'controllers/customer_controller.php';
                                <?php
                                     foreach ($medicines as $row) {
                                ?>
-                               <option value="<?=$row['id']?>"><?=$row['med_name']?></option>
+                               <option data-medPrice="<?=$row['price'] ?>" value="<?=$row['id']?>"><?=$row['med_name']?></option>
                                <?php
                                     }
                                 ?>
                             </select>
                         </div>
 
-                        <div class="mb-3">
+                        <div  class="mb-3">
                             <label for="" class="form-label">Number of Purchase</label>
-                            <input type="number" class="form-control" id="buy_num_of_purchase" name="buy_num_of_purchase" value=1 required>
+                            <input type="number" class="form-control" id="buy_num_of_purchase" name="buy_num_of_purchase" value=1 required >
+                        </div>
+                        <div class="text-end">
+                            <span id="medp_span" class="fw-bold">Base Price: ₱0.00</span>
                         </div>
 
-                        <div class="mb-3">
+                        <div class="text-end">
+                            <span id="medqty_span" class="fw-bold">Base Total:  ₱0.00</span>
+                        </div>
+
+                        <div class="text-end">
+                            <span id="meddis_span" class="fw-bold">Discount(%): 0%</span>
+                        </div>
+
+                        <div class="text-end">
+                            <span id="medprice_span" class="fw-bold">Total Price: ₱0.00</span>
+                        </div>
+
+                        <div  hidden class="mb-3">
                             <label for="" class="form-label">Price</label>
                             <input type="number" step="0.01" class="form-control" id="buy_price" name="buy_price" required readonly>
                         </div>
@@ -201,6 +218,11 @@ include 'controllers/customer_controller.php';
             width: '100%',
             dropdownParent: $('#addMedicineModal')
         });
+
+        $('#selcustomer_name, #selmed_name').select2({
+            width: '100%',
+            dropdownParent: $('#BuyModal')
+        });
     });
 </script>
 <script>
@@ -214,6 +236,8 @@ include 'controllers/customer_controller.php';
                 stripe: true
             }
         });
+
+    
 });
 
 function deletemed(el){
@@ -261,8 +285,28 @@ function deletemed(el){
 }
 
 function editmed(el){
+    // mao ni ang id sa medicine nga imong iedit
     let edit_medID = $(el).attr('data-editID');
 
+    // populate the modal fields before muopen ang modal
+
+    // use ajax to request data from medicines table where id = edit_medID
+    //ajax url must be controllers/yourfile.php
+
+    //inside controllers/yourfile.php is your query SELECT * FROM medicines WHERE id = edit_medID
+    
+    //ajax data must be edit_medID
+    //ajax method is POST
+
+    /* ajax success callback diha nimo ipopulate ang fields then show sa modal
+        ex.$('#edit_med_name).val(response[med_name])
+        $('#idsa_mga_fields).val(datafromdatabase[column_name])
+        $('#idsa_mga_fields).val(datafromdatabase[column_name])
+        $('#idsa_mga_fields).val(datafromdatabase[column_name])
+        $('#idsa_mga_fields).val(datafromdatabase[column_name])
+
+        $('#editMedicineModal').modal('show'); 
+    */
     $('#editMedicineModal').modal('show');
 }
 
@@ -277,18 +321,84 @@ function show_buymedmodal(){
     $('#selcustomer_name').val(null).trigger('change');
     $('#selmed_name').val(null).trigger('change');
     $('#BuyModal').modal('show');
+
+    // on change of medicine
+    $('#selmed_name').on('change', function(){
+        calculatePrice()
+    });
+    // end onchange medicine
+
+    // onchange num of purchase
+    $('#buy_num_of_purchase').on('keyup', function(){
+        calculatePrice()
+    });
+    // end onchange num of purchase
+    
+    // on change of customer\
+    $('#selcustomer_name').on('change', function(){
+        calculatePrice()
+    });
+    // end on change of customer
 }
+
+function calculatePrice() {
+    // Get values and parse as numbers
+    let discount = parseFloat($('#selcustomer_name').find(':selected').attr('data-discount')) || 0;
+    let med_price = parseFloat($('#selmed_name').find(':selected').attr('data-medPrice')) || 0;
+    let numofp = parseFloat($('#buy_num_of_purchase').val()) || 0;
+    let total = 0;
+
+    // Validate inputs first
+    if (!med_price || !numofp) {
+        total = 0;
+    } else {
+        // Calculate with or without discount
+        if (discount) {
+            let discountedPrice = med_price * (1 - (discount / 100));
+            total = discountedPrice * numofp;
+        } else {
+            total = med_price * numofp;
+        }
+    }
+    $('#buy_price').val(total);
+    let undiscounted = med_price * numofp;
+    const formatPrice =  med_price.toLocaleString('en-PH', {
+        style: 'currency',
+        currency: 'PHP',
+    });
+
+    const formatUndiscounted = undiscounted.toLocaleString('en-PH', {
+        style: 'currency',
+        currency: 'PHP',
+    });
+
+    // Format total as PHP currency using toLocaleString
+    const formattedTotal = total.toLocaleString('en-PH', {
+        style: 'currency',
+        currency: 'PHP',
+    });
+
+    $('#medp_span').text(`Base Price: ${formatPrice}`);
+    $('#medqty_span').text(`Base Total: ${formatUndiscounted}`);
+    // Set the value of #buy_price
+    $('#medprice_span').text(`Total Price: ${formattedTotal}`);
+    $('#meddis_span').text(`Discount(%): ${discount}%`);
+}
+
+
+
 
 $('#addMedForm').on('submit', function(e) {
     e.preventDefault();
     let addmedformdata = new FormData(this);
-    console.log(...addmedformdata);
+
     $.ajax({
         url: 'controllers/add_medicine.php',
         method: 'POST',
         data: addmedformdata,
         processData: false, 
         contentType: false,
+
         success: function(response) {
             $('#addMedicineModal').modal('hide');
             swal.fire({
@@ -312,8 +422,10 @@ $('#addMedForm').on('submit', function(e) {
 
 $('#buyMedForm').on('submit', function(e) {
     e.preventDefault();
+
     let addmedformdata = new FormData(this);
     console.log(...addmedformdata);
+
     $.ajax({
         url: 'controllers/add_medicine.php',
         method: 'POST',
@@ -340,6 +452,44 @@ $('#buyMedForm').on('submit', function(e) {
         }
     });
 });
+
+$('#BuyModalForm').on('submit', function(e) {
+    e.preventDefault();
+
+    let buyformdata = new FormData(this);
+    $.ajax({
+        url: 'controllers/buy_medicine.php',
+        method: 'POST',
+        data: buyformdata,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            $('#BuyModal').modal('hide');
+            swal.fire({
+                title: 'Success',
+                text: response.message,
+                icon: 'success'
+            }).then(() => {
+                location.reload();
+            });
+        },
+        error: function(xhr) {
+            // Parse response if JSON, fallback otherwise
+            let response;
+            try {
+                response = JSON.parse(xhr.responseText);
+            } catch {
+                response = { message: 'An unknown error occurred' };
+            }
+            Swal.fire({
+                title: 'Error',
+                text: response.message || 'An error occurred',
+                icon: 'error'
+            });
+        }
+    });
+});
+
 
 
 
