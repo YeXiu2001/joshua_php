@@ -3,14 +3,15 @@ ob_start(); // Start output buffering
 
 include 'controllers/medicine_controller.php';
 include 'controllers/categories_controller.php';
+include 'controllers/customer_controller.php';
 ?>
 
 <div class="container">
 
     <h3 class="text-center">Simple Pharmacy System</h3>
     <div class="mt-3">
-        <button class="btn btn-primary">Buy</button>
-        <button class="btn btn-primary" onclick="show_addmedmodal()">Add Medicine</button>
+        <button class="btn btn-primary"onclick="show_buymedmodal()">Buy</button>
+        <button class="btn btn-primary" onclick="show_buymedmodal()">Add Medicine</button>
         <button class="btn btn-secondary">View ERD</button>
     </div>
     
@@ -135,6 +136,65 @@ include 'controllers/categories_controller.php';
     <!-- EDIT modal for add medicine -->
 </div>
 
+
+     <!-- Buy modal for add medicine -->
+     <div class="modal fade" id="BuyModal" tabindex="-1"  aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Buy Medicine</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="BuyModalForm" action="">
+                        <div class="mb-3">
+                            <label for="" class="form-label">Premium Customer's Name</label>
+                            <select type="text" class="form-select" id="selcustomer_name" name="selcustomer_name" required>
+                            <option value="">Select..</option>
+                               <?php
+                                    foreach ($customers as $row) {
+                               ?>
+                               <option value="<?=$row['id']?>"><?=$row['customer_name']?></option>
+                               <?php
+                                    }
+                                ?>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="" class="form-label">Medicine</label>
+                            <select type="text" class="form-select" id="selmed_name" name="selmed_name" required>
+                            <option value="">Select..</option>
+                               <?php
+                                    foreach ($medicines as $row) {
+                               ?>
+                               <option value="<?=$row['id']?>"><?=$row['med_name']?></option>
+                               <?php
+                                    }
+                                ?>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="" class="form-label">Number of Purchase</label>
+                            <input type="number" class="form-control" id="buy_num_of_purchase" name="buy_num_of_purchase" value=1 required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="" class="form-label">Price</label>
+                            <input type="number" step="0.01" class="form-control" id="buy_price" name="buy_price" required readonly>
+                        </div>
+                        
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Submit</button>          
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- BUY modal for add medicine -->
+</div>
+
 <script>
     $(document).ready(function() {
         $('#addmodal_cat').select2({
@@ -212,6 +272,13 @@ function show_addmedmodal(){
     $('#addMedicineModal').modal('show');
 }
 
+function show_buymedmodal(){
+    $('#BuyModalForm')[0].reset();
+    $('#selcustomer_name').val(null).trigger('change');
+    $('#selmed_name').val(null).trigger('change');
+    $('#BuyModal').modal('show');
+}
+
 $('#addMedForm').on('submit', function(e) {
     e.preventDefault();
     let addmedformdata = new FormData(this);
@@ -242,6 +309,40 @@ $('#addMedForm').on('submit', function(e) {
         }
     });
 });
+
+$('#buyMedForm').on('submit', function(e) {
+    e.preventDefault();
+    let addmedformdata = new FormData(this);
+    console.log(...addmedformdata);
+    $.ajax({
+        url: 'controllers/add_medicine.php',
+        method: 'POST',
+        data: addmedformdata,
+        processData: false, 
+        contentType: false,
+        success: function(response) {
+            $('#buyMedicineModal').modal('hide');
+            swal.fire({
+                title: 'Success',
+                text: 'Medicine added successfully',
+                icon: 'success'
+            }).then(() => {
+                location.reload();
+            });
+        },
+        error: function(err) {
+            console.log(err.message);
+            swal.fire({
+                title: 'Error',
+                text: 'There was an error adding the medicine',
+                icon: 'error'
+            });
+        }
+    });
+});
+
+
+
 </script>
 
 <?php
