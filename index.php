@@ -110,12 +110,21 @@ include 'controllers/customer_controller.php';
                     <form id="editMedForm" action="">
                         <div class="mb-3">
                             <label for="" class="form-label">Medicine</label>
-                            <input type="text" class="form-control" id="edit_med_name" name="edit_ed_name" required>
+                            <input type="text" class="form-control" id="edit_med_name" name="edit_med_name" required>
                         </div>
 
                         <div class="mb-3">
                             <label for="" class="form-label">Category</label>
-                            <input type="text" class="form-control" id="edit_category" name="edit_category" required>
+                            <select type="text" class="form-select" id="edit_category" name="edit_category" required>
+                            <option value="">Select..</option>
+                               <?php
+                                    foreach ($categories as $row) {
+                               ?>
+                               <option value="<?=$row['id']?>"><?=$row['cate_name']?></option>
+                               <?php
+                                    }
+                                ?>
+                            </select>
                         </div>
 
                         <div class="mb-3">
@@ -126,6 +135,11 @@ include 'controllers/customer_controller.php';
                         <div class="mb-3">
                             <label for="" class="form-label">Price</label>
                             <input type="number" step="0.01" class="form-control" id="edit_price" name="edit_price" required>
+                        </div>
+
+                        <div hidden class="mb-3">
+                            <label for="" class="form-label">Id</label>
+                            <input type="text" class="form-control" id="edit_med_id" name="edit_med_id" readonly>
                         </div>
                         
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -223,6 +237,11 @@ include 'controllers/customer_controller.php';
             width: '100%',
             dropdownParent: $('#BuyModal')
         });
+
+        $('#edit_category').select2({ //select id
+            width: '100%',
+            dropdownParent: $('#editMedicineModal') //modal ID
+        });
     });
 </script>
 <script>
@@ -287,27 +306,30 @@ function deletemed(el){
 function editmed(el){
     // mao ni ang id sa medicine nga imong iedit
     let edit_medID = $(el).attr('data-editID');
-
-    // populate the modal fields before muopen ang modal
-
-    // use ajax to request data from medicines table where id = edit_medID
-    //ajax url must be controllers/yourfile.php
-
-    //inside controllers/yourfile.php is your query SELECT * FROM medicines WHERE id = edit_medID
+    console.log(edit_medID);
+    $.ajax({
+        url: 'controllers/get_medicine.php',
+        method: 'GET',
+        data: {medID: edit_medID},
+        success: function(response) {
+        console.log(response.data['med_name']);
+        $('#edit_med_name').val(response.data['med_name']);
+        $('#edit_stock_num').val(response.data['stock_num']);
+        $('#edit_med_id').val(response.data['id']);
+        $('#edit_category').val(response.data['cate_id']).trigger('change');
+        $('#edit_price').val(response.data['price']);
+          $('#editMedicineModal').modal('show');
+        },
+        error: function(err) {
+            console.log(err.message);
+            swal.fire({
+                title: 'Error',
+                text: 'There was an error fetching the medicine details',
+                icon: 'error'
+            });
+        }
+    });
     
-    //ajax data must be edit_medID
-    //ajax method is POST
-
-    /* ajax success callback diha nimo ipopulate ang fields then show sa modal
-        ex.$('#edit_med_name).val(response[med_name])
-        $('#idsa_mga_fields).val(datafromdatabase[column_name])
-        $('#idsa_mga_fields).val(datafromdatabase[column_name])
-        $('#idsa_mga_fields).val(datafromdatabase[column_name])
-        $('#idsa_mga_fields).val(datafromdatabase[column_name])
-
-        $('#editMedicineModal').modal('show'); 
-    */
-    $('#editMedicineModal').modal('show');
 }
 
 function show_addmedmodal(){
@@ -490,6 +512,39 @@ $('#BuyModalForm').on('submit', function(e) {
     });
 });
 
+$('#editMedForm').on('submit', function(e) {
+    e.preventDefault();
+    let editmedformdata = new FormData(this);
+    for (let pair of editmedformdata.entries()) {
+        console.log(pair[0] + ': ' + pair[1]);
+    }
+    $.ajax({
+        url: 'controllers/edit_medicine.php',
+        method: 'POST',
+        data: editmedformdata,
+        processData: false, 
+        contentType: false,
+
+        success: function(response) {
+            $('#editMedicineModal').modal('hide');
+            swal.fire({
+                title: 'Success',
+                text: 'Medicine updated successfully',
+                icon: 'success'
+            }).then(() => {
+                location.reload();
+            });
+        },
+        error: function(err) {
+            console.log(err.message);
+            swal.fire({
+                title: 'Error',
+                text: 'There was an error updating the medicine',
+                icon: 'error'
+            });
+        }
+    });
+});
 
 
 
