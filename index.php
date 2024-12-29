@@ -12,7 +12,7 @@ include 'controllers/customer_controller.php';
     <div class="mt-3">
         <button class="btn btn-primary"onclick="show_buymedmodal()">Buy</button>
         <button class="btn btn-primary" onclick="show_addmedmodal()">Add Medicine</button>
-        <button class="btn btn-secondary">View ERD</button>
+        <button class="btn btn-secondary" onclick="view_erd()">View ERD</button>
     </div>
     
     <div class="mt-3">
@@ -224,7 +224,26 @@ include 'controllers/customer_controller.php';
         </div>
     </div>
     <!-- BUY modal for add medicine -->
+
+    <!-- START modal for viewing medicine details -->
+    <div class="modal fade" id="viewERDModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">View ERD</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center">
+                        <img src="assets/images/erd.png" alt="ERD" class="img-fluid">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- END modal for viewing medicine details -->
 </div>
+
 
 <script>
     $(document).ready(function() {
@@ -301,6 +320,11 @@ function deletemed(el){
             });
         }
     })
+}
+
+function view_erd(){
+    $('#viewERDModal').modal('show');
+
 }
 
 function editmed(el){
