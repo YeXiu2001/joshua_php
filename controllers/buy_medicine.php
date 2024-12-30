@@ -3,10 +3,11 @@ include 'connections.php';
 
 $cus = $_POST['selcustomer_name'];
 $med = $_POST['selmed_name'];
+$staff = $_POST['staffmod_name'];
 $quantity = $_POST['buy_num_of_purchase'];
 $price = $_POST['buy_price'];
 
-if (!isset($cus) || !isset($med) || !isset($quantity) || !isset($price)) {
+if (!isset($cus) || !isset($med) || !isset($quantity) || !isset($staff) || !isset($price)) {
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'Missing Data!']);
     exit;
@@ -32,8 +33,8 @@ try {
         exit();
     }
 
-    $stmt = $conn->prepare("INSERT INTO purchases (prem_cus_id, med_id, num_purchase, total_price) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("iiid", $cus, $med, $quantity, $price);
+    $stmt = $conn->prepare("INSERT INTO purchases (prem_cus_id, med_id, staff_id, num_purchase, total_price) VALUES (?, ?, ?, ?, ?)");
+    $stmt->bind_param("iiiid", $cus, $med, $staff, $quantity, $price);
     $stmt->execute();
 
     $stmt2 = $conn->prepare("UPDATE medicines SET stock_num = stock_num - ? WHERE id = ?");
