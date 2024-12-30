@@ -71,10 +71,30 @@ $.ajax({
     contentType: false,
 
     success: function(response) {
-        console.log(response);
-            window.location.href = 'pharmacy.php';
-        
-
+        if (typeof response === 'string') {
+            response = JSON.parse(response);
+        }
+        let staff_name = response.data.staff_name;
+        let staff_id = response.data.id;
+        $.ajax({
+            type: 'POST',
+            url: 'authentication/authsession.php',
+            data: {
+                staff_name: staff_name,
+                staff_id: staff_id
+            },
+            success: function() {
+                window.location.href = 'pharmacy.php';
+            },
+            error: function(err) {
+                console.log(err.message);
+                swal.fire({
+                    title: 'Error',
+                    text: 'Invalid Username and Password',
+                    icon: 'error'
+                });
+            }
+        });
     },
     error: function(err) {
         console.log(err.message);

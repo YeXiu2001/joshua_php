@@ -1,10 +1,8 @@
 <?php
-include 'C:\xampp\htdocs\joshua_php\controllers\connections.php';
+include '../controllers/connections.php';
 
 $username = $_POST['uname'];
 $pass = $_POST['pword'];
-
-
 
 if (!isset($username) || !isset($pass)) {
     http_response_code(400);
@@ -19,10 +17,12 @@ $result = $conn->query($verquery);
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'Invalid Username or Password']);
     exit; 
-// header("Location: /index.php");
   }
 else {  
-    echo json_encode(['status' => 'success', 'message' => 'Login Successful']);
+    echo json_encode([
+      'status' => 'success', 'message' => 'Login Successful',
+      'data' => $result->fetch_assoc()
+    ]);
 }
 
 

@@ -1,5 +1,14 @@
 <?php
+session_start();
 ob_start(); // Start output buffering
+
+if (!isset($_SESSION['staff_id']) || !isset($_SESSION['staff_name'])) {
+    header('Location: index.php');
+    exit;
+}
+
+$staff_id = $_SESSION['staff_id'];
+$staff_name = $_SESSION['staff_name'];
 
 include 'controllers/medicine_controller.php';
 include 'controllers/categories_controller.php';
@@ -8,8 +17,14 @@ include 'controllers/staff_names.php';
 ?>
 
 <div class="container">
+    <div class="topheader">
+        <h3 class="text-center">Simple Pharmacy System</h3>
+        <div class="text-end">
+            <span class="fw-bold"><?=$staff_name?></span>
+            <a href="authentication/logout.php" class="btn btn-sm btn-danger">Logout</a>
+        </div>
+    </div>
 
-    <h3 class="text-center">Simple Pharmacy System</h3>
     <div class="mt-3">
         <button class="btn btn-primary"onclick="show_buymedmodal()">Buy</button>
         <button class="btn btn-primary" onclick="show_addmedmodal()">Add Medicine</button>
@@ -522,8 +537,9 @@ $('#buyMedForm').on('submit', function(e) {
 
 $('#BuyModalForm').on('submit', function(e) {
     e.preventDefault();
-
     let buyformdata = new FormData(this);
+    // iappend ang staff id sa formdata
+    //buyformdata.append('staff_id', <?=$staff_id?>);
     $.ajax({
         url: 'controllers/buy_medicine.php',
         method: 'POST',
