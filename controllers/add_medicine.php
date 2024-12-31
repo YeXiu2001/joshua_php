@@ -5,8 +5,10 @@ $med_name = $_POST['med_name'];
 $cate_id = $_POST['addmodal_cat'];
 $stock_num = $_POST['stock_num'];
 $price = $_POST['price'];
+$staffid = $_POST['msid'];
+$cdate = date('Y-m-d H:i:s');
 
-if (!isset($med_name) || !isset($cate_id) || !isset($stock_num) || !isset($price)) {
+if (!isset($med_name) || !isset($cate_id) || !isset($stock_num) || !isset($price) || !isset($staffid)) {
     echo json_encode(['status' => 'error', 'message' => 'Missing Data!']);
     exit;
 }
@@ -14,8 +16,8 @@ if (!isset($med_name) || !isset($cate_id) || !isset($stock_num) || !isset($price
 try {
     // Start transaction
     $conn->begin_transaction();
-    $stmt = $conn->prepare("INSERT INTO medicines (med_name, cate_id, stock_num, price) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param("siid", $med_name, $cate_id, $stock_num, $price);
+    $stmt = $conn->prepare("INSERT INTO medicines (med_name, cate_id, stock_num, price, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("siidis", $med_name, $cate_id, $stock_num, $price, $staffid, $cdate);
     $stmt->execute();
 
     if ($stmt->affected_rows > 0) {

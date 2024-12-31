@@ -25,7 +25,7 @@
                         <div class="card mb-3">
                            <div class="card-body">
                               <div class="pt-4 pb-2">
-                                 <h5 class="card-title text-center pb-0 fs-4"><strong>Login to Your Account</strong></h5>
+                                 <h5 class="card-title text-center pb-0 fs-4"><strong>Simple Pharmacy System Login</strong></h5>
                                  <p class="text-center small">Enter your Username and Password to login</p>
                               </div>
                               <form class="row g-3 needs-validation" id="loginform" method="POST">

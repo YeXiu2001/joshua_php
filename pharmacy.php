@@ -207,7 +207,7 @@ include 'controllers/staff_names.php';
                             </select>
                         </div>
 
-                        <div class="mb-3">
+                        <!-- <div class="mb-3">
                             <label for="" class="form-label">Staff Name</label>
                             <select type="text" class="form-select" id="staffmod_name" name="staffmod_name" required>
                             <option value="">Select..</option>
@@ -219,7 +219,7 @@ include 'controllers/staff_names.php';
                                     }
                                 ?>
                             </select>
-                        </div>
+                        </div> -->
 
                         <div  class="mb-3">
                             <label for="" class="form-label">Number of Purchase</label>
@@ -265,7 +265,7 @@ include 'controllers/staff_names.php';
                 </div>
                 <div class="modal-body">
                     <div class="text-center">
-                        <img src="assets/images/erd.png" alt="ERD" class="img-fluid">
+                        <img src="assets/images/ERD new1.jpg" alt="ERD" class="img-fluid">
                     </div>
                 </div>
             </div>
@@ -474,6 +474,9 @@ $('#addMedForm').on('submit', function(e) {
     e.preventDefault();
     let addmedformdata = new FormData(this);
 
+    let msid = <?= json_encode($staff_id) ?>;
+    addmedformdata.append('msid', msid);
+
     $.ajax({
         url: 'controllers/add_medicine.php',
         method: 'POST',
@@ -539,7 +542,9 @@ $('#BuyModalForm').on('submit', function(e) {
     e.preventDefault();
     let buyformdata = new FormData(this);
     // iappend ang staff id sa formdata
-    //buyformdata.append('staff_id', <?=$staff_id?>);
+
+    let sid = <?= json_encode($staff_id) ?>;
+    buyformdata.append('sid', sid);
     $.ajax({
         url: 'controllers/buy_medicine.php',
         method: 'POST',
@@ -558,6 +563,7 @@ $('#BuyModalForm').on('submit', function(e) {
         },
         error: function(xhr) {
             // Parse response if JSON, fallback otherwise
+           
             let response;
             try {
                 response = JSON.parse(xhr.responseText);

@@ -3,13 +3,12 @@ include 'connections.php';
 
 $cus = $_POST['selcustomer_name'];
 $med = $_POST['selmed_name'];
-$staff = $_POST['staffmod_name'];
 $quantity = $_POST['buy_num_of_purchase'];
 $price = $_POST['buy_price'];
-$staff_id = //butang diri ang data gikan sa imong giappebd sa formdata
-// iapil diri ang staff_id nga imong gi append sa formdata
+$staffid = $_POST['sid'];
+$cdate = date('Y-m-d H:i:s');
 
-if (!isset($cus) || !isset($med) || !isset($quantity) || !isset($staff) || !isset($price)) {
+if (!isset($cus) || !isset($med) || !isset($quantity) || !isset($price) || !isset($staffid)) {
     http_response_code(400);
     echo json_encode(['status' => 'error', 'message' => 'Missing Data!']);
     exit;
@@ -18,7 +17,6 @@ if (!isset($cus) || !isset($med) || !isset($quantity) || !isset($staff) || !isse
 try {
     // Start transaction
     $conn->begin_transaction();
-    $current_date = date('Y-m-d H:i:s');
 
     $checkStock = $conn->prepare("SELECT stock_num FROM medicines WHERE id = ?");
     $checkStock->bind_param("i", $med);
@@ -36,11 +34,8 @@ try {
         exit();
     }
 
-    // iapil ang created_by, created_at sa insert statement
-    // gamita ang $current_date nga variable sa created_at
-    // gamita ang staff_id nga variable sa created_by
-    $stmt = $conn->prepare("INSERT INTO purchases (prem_cus_id, med_id, staff_id, num_purchase, total_price) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("iiiid", $cus, $med, $staff, $quantity, $price);
+    $stmt = $conn->prepare("INSERT INTO purchases (prem_cus_id, med_id, staff_id, num_purchase, total_price, created_by, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("iiiidis", $cus, $med, $staffid, $quantity, $price, $staffid, $cdate);
     $stmt->execute();
 
     $stmt2 = $conn->prepare("UPDATE medicines SET stock_num = stock_num - ? WHERE id = ?");
